@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 ## Based on original script by Joel Chaney, joel.chaney@mongoosemetrics.com, 2012-02-03
 
 SLAVE_STATUS=/tmp/sstatus
 
-SLAVE=mysql -u $MYSQL_USERNAME -p"'$MYSQL_PASSWORD'" -h $MYSQL_HOSTNAME
+SLAVE="mysql -u $MYSQL_USERNAME -p\"'$MYSQL_PASSWORD'\" -h $MYSQL_HOSTNAME"
 
 $SLAVE -e 'SHOW SLAVE STATUS\G' > $SLAVE_STATUS
 
