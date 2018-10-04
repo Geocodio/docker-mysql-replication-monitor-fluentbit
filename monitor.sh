@@ -48,7 +48,7 @@ safe_command $MYSQL_STATUS_COMMAND
 
 STATUS_FILESIZE=$(stat -c%s "$SLAVE_STATUS")
 
-if [[ $STATUS_FILESIZE -lte 0 ]]
+if [[ $STATUS_FILESIZE -lt 5 ]]
 then
     STATUS="{\"success\": false, \"message\": \"SHOW SLAVE STATUS returned no data\"}"
     send_status $STATUS
