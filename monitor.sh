@@ -61,8 +61,10 @@ then
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-if [[ $ERROR_COUNT -gt 0 ]] then
-  if [[ check_alert_lock == 0 ]] then
+if [[ $ERROR_COUNT -gt 0 ]]
+then
+  if [[ check_alert_lock == 0 ]]
+  then
     STATUS='{"success": false, "error_count": $ERROR_COUNT, "errors": $JSON_ERRORS, "message": "$Slave_ERROR"}'
   fi
 else
