@@ -1,9 +1,15 @@
-.PHONY: default run build
+.PHONY: default build deploy run
 
-default: build 
+default: build
+
+org = geocodio
+name = docker-mysql-replication-monitor-fluentbit
 
 build:
-	docker build -t geocodio/docker-mysql-replication-monitor-fluentbit .
+	docker build -t $(org)/$(name) .
+
+deploy:
+	docker push $(org)/$(name)
 
 run:
-	docker run --rm --name=replication-monitor --env-file=.env geocodio/docker-mysql-replication-monitor-fluentbit
+	docker run --rm --name=$(name) --env-file=.env $(tag)
