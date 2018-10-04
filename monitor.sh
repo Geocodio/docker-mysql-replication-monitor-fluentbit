@@ -35,7 +35,7 @@ Slave_SQL_Running=$(extract_value $SLAVE_STATUS Slave_SQL_Running)
 Slave_ERROR=$(extract_value $SLAVE_STATUS Last_Error)
 
 ERROR_COUNT=0
-if [ "$Master_Binlog" != "$Master_Log_File" ]
+if [[ "$Master_Binlog" != "$Master_Log_File" ]]
 then
     ERRORS[$ERROR_COUNT]="master binlog ($Master_Binlog) and Master_Log_File         ($Master_Log_File) differ"
     ERROR_COUNT=$(($ERROR_COUNT+1))
@@ -43,26 +43,26 @@ fi
 
 POS_DIFFERENCE=$(echo ${Master_Position}-${Read_Master_Log_Pos}|bc)
 
-if [ $POS_DIFFERENCE -gt 1000 ]
+if [[ $POS_DIFFERENCE -gt 1000 ]]
 then
     ERRORS[$ERROR_COUNT]="The slave is lagging behind of $POS_DIFFERENCE"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-if [ "$Slave_IO_Running" == "No" ]
+if [[ "$Slave_IO_Running" == "No" ]]
 then
     ERRORS[$ERROR_COUNT]="Replication is stopped"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-if [ "$Slave_SQL_Running" == "No" ]
+if [[ "$Slave_SQL_Running" == "No" ]]
 then
     ERRORS[$ERROR_COUNT]="Replication (SQL) is stopped"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-if [ $ERROR_COUNT -gt 0 ] then
-  if [ check_alert_lock == 0 ] then
+if [[ $ERROR_COUNT -gt 0 ]] then
+  if [[ check_alert_lock == 0 ]] then
     STATUS='{"success": false, "error_count": $ERROR_COUNT, "errors": $JSON_ERRORS, "message": "$Slave_ERROR"}'
   fi
 else
