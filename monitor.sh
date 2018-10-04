@@ -43,7 +43,7 @@ function json_array {
 
 SLAVE_STATUS=/tmp/sstatus
 
-SLAVE="mysql -u $MYSQL_USERNAME -p$MYSQL_PASSWORD -h $MYSQL_HOSTNAME"
+SLAVE="mysql -u $MYSQL_USERNAME -p'$MYSQL_PASSWORD' -h $MYSQL_HOSTNAME"
 
 MYSQL_STATUS_COMMAND="$SLAVE -e 'SHOW SLAVE STATUS\G' > $SLAVE_STATUS"
 safe_command $MYSQL_STATUS_COMMAND
@@ -99,10 +99,10 @@ if [[ $ERROR_COUNT -gt 0 ]]
 then
   if [[ check_alert_lock == 0 ]]
   then
-    STATUS="{\"success\": false, \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
+    STATUS="{\"success\": false, , \"lag_seconds\": \"$POS_DIFFERENCE\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
   fi
 else
-    STATUS='{"success": true}'
+    STATUS="{\"success\": true, \"lag_seconds\": \"$POS_DIFFERENCE\", \"error_count\": 0}"
 fi
 
 send_status $STATUS

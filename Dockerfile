@@ -8,6 +8,6 @@ RUN apt-get -qqy update && \
 
 ENV MYSQL_HOSTNAME="" MYSQL_USERNAME="" MYSQL_PASSWORD="" FLUENTBIT_HOSTNAME="" FLUENTBIT_PORT="5170"
 
-ENV CRON_D_BACKUP="*/5 * * * * root /monitor.sh | logger\n"
+ENV CRON_D_MONITOR="*/5 * * * * root /monitor.sh | logger\n"
 
 COPY monitor.sh /

@@ -15,7 +15,7 @@ FLUENTBIT_PORT="5170"
 ```
 
 ```
-CRON_D_BACKUP="*/5 * * * * root /monitor.sh | logger\n"
+CRON_D_MONITOR="*/5 * * * * root /monitor.sh | logger\n"
 ```
 
 > See also `.env.example`
