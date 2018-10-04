@@ -1,11 +1,26 @@
 #!/bin/bash
 ## Based on original script by Joel Chaney, joel.chaney@mongoosemetrics.com, 2012-02-03
 
-SLAVE_STATUS=/tmp/sstatus
+function send_status {
+    echo $1 | nc $FLUENTBIT_HOSTNAME $FLUENTBIT_PORT
+}
 
-SLAVE="mysql -u $MYSQL_USERNAME -p\"'$MYSQL_PASSWORD'\" -h $MYSQL_HOSTNAME"
+function safe_command {
+  typeset cmnd="$*"
+  typeset ret_code
 
-$SLAVE -e 'SHOW SLAVE STATUS\G' > $SLAVE_STATUS
+  echo cmnd=$cmnd
+  eval $cmnd
+  ret_code=$?
+  if [ $ret_code != 0 ]; then
+    printf "Error : [%d] when executing command: '$cmnd'" $ret_code
+    STATUS="{\"success\": false, \"message\": \"$cmnd\"}"
+
+    send_status $STATUS
+
+    exit $ret_code
+  fi
+}
 
 function extract_value {
     FILENAME=$1
@@ -23,6 +38,13 @@ function json_array {
     done
     OUTPUT="${OUTPUT}]"
 }
+
+SLAVE_STATUS=/tmp/sstatus
+
+SLAVE="mysql -u $MYSQL_USERNAME -p\"'$MYSQL_PASSWORD'\" -h $MYSQL_HOSTNAME"
+
+MYSQL_STATUS_COMMAND="$SLAVE -e 'SHOW SLAVE STATUS\G' > $SLAVE_STATUS"
+safe_command $MYSQL_STATUS_COMMAND
 
 Master_Binlog=$(extract_value $SLAVE_STATUS Master_Log_File )
 Master_Position=$(extract_value $SLAVE_STATUS Read_Master_Log_Pos )
@@ -65,11 +87,11 @@ if [[ $ERROR_COUNT -gt 0 ]]
 then
   if [[ check_alert_lock == 0 ]]
   then
-    STATUS='{"success": false, "error_count": $ERROR_COUNT, "errors": $JSON_ERRORS, "message": "$Slave_ERROR"}'
+    STATUS="{\"success\": false, \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
   fi
 else
     STATUS='{"success": true}'
 fi
 
 echo $STATUS
-echo $STATUS | nc fluentbit 5170
+send_status $STATUS
