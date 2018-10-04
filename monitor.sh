@@ -2,14 +2,16 @@
 ## Based on original script by Joel Chaney, joel.chaney@mongoosemetrics.com, 2012-02-03
 
 function send_status {
-    echo $1 | nc $FLUENTBIT_HOSTNAME $FLUENTBIT_PORT
+    STATUS="$*"
+
+    echo "Sending status $STATUS"
+    echo $STATUS | nc $FLUENTBIT_HOSTNAME $FLUENTBIT_PORT
 }
 
 function safe_command {
   typeset cmnd="$*"
   typeset ret_code
 
-  echo cmnd=$cmnd
   eval $cmnd
   ret_code=$?
   if [ $ret_code != 0 ]; then
@@ -103,5 +105,4 @@ else
     STATUS='{"success": true}'
 fi
 
-echo $STATUS
 send_status $STATUS
