@@ -14,7 +14,7 @@ function safe_command {
   ret_code=$?
   if [ $ret_code != 0 ]; then
     printf "Error : [%d] when executing command: '$cmnd'" $ret_code
-    STATUS="{\"success\": false, \"message\": \"$cmnd\"}"
+    STATUS="{\"success\": false, \"message\": \"Command failed with exit code $ret_code\"}"
 
     send_status $STATUS
 
@@ -45,6 +45,16 @@ SLAVE="mysql -u $MYSQL_USERNAME -p$MYSQL_PASSWORD -h $MYSQL_HOSTNAME"
 
 MYSQL_STATUS_COMMAND="$SLAVE -e 'SHOW SLAVE STATUS\G' > $SLAVE_STATUS"
 safe_command $MYSQL_STATUS_COMMAND
+
+STATUS_FILESIZE=$(stat -c%s "$SLAVE_STATUS")
+
+if [[ $STATUS_FILESIZE -lte 0 ]]
+then
+    STATUS="{\"success\": false, \"message\": \"SHOW SLAVE STATUS returned no data\"}"
+    send_status $STATUS
+
+    exit 1
+fi
 
 Master_Binlog=$(extract_value $SLAVE_STATUS Master_Log_File )
 Master_Position=$(extract_value $SLAVE_STATUS Read_Master_Log_Pos )
