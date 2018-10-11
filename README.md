@@ -18,6 +18,8 @@ FLUENTBIT_PORT="5170"
 CRON_D_MONITOR="*/5 * * * * root /monitor.sh | logger\n"
 ```
 
+**Note**: The "\n" at the end of the line is required by `cron` to be able to recognize the job
+
 > See also `.env.example`
 
 ## Releasing
