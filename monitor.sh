@@ -31,7 +31,7 @@ function extract_value {
 }
 
 function json_array() {
-  printf '%s\n' "${X[@]}" | jq -R . | jq -s .
+    printf '%s\n' "${X[@]}" | jq -R . | jq -s .
 }
 
 SLAVE_STATUS=/tmp/sstatus
