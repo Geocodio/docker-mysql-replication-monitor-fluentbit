@@ -30,15 +30,15 @@ function extract_value {
     grep -w $VAR $FILENAME | awk '{print $2}'
 }
 
-function json_array {
-    OUTPUT="["
-    while [ $# -gt 0 ]; do
-        x=${1//\\/\\\\}
-        OUTPUT="${OUTPUT}\"${x//\"/\\\"}\""
-        [ $# -gt 1 ] && OUTPUT="${OUTPUT}, "
-        shift
-    done
-    OUTPUT="${OUTPUT}]"
+function json_array() {
+  echo -n '['
+  while [ $# -gt 0 ]; do
+    x=${1//\\/\\\\}
+    echo -n \"${x//\"/\\\"}\"
+    [ $# -gt 1 ] && echo -n ', '
+    shift
+  done
+  echo ']'
 }
 
 SLAVE_STATUS=/tmp/sstatus
@@ -97,7 +97,8 @@ fi
 
 if [[ $ERROR_COUNT -gt 0 ]]
 then
-    STATUS="{\"success\": false, , \"position_lag\": \"$POS_DIFFERENCE\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
+    JSON_ERRORS=$(json_array $ERRORS)
+    STATUS="{\"success\": false, \"position_lag\": \"$POS_DIFFERENCE\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
 else
     STATUS="{\"success\": true, \"position_lag\": \"$POS_DIFFERENCE\", \"error_count\": 0}"
 fi
