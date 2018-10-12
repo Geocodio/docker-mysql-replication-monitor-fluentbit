@@ -30,10 +30,6 @@ function extract_value {
     grep -w $VAR $FILENAME | awk '{print $2}'
 }
 
-function json_array() {
-    printf '%s\n' "${X[@]}" | jq -R . | jq -s .
-}
-
 SLAVE_STATUS=/tmp/sstatus
 
 SLAVE="mysql -u $MYSQL_USERNAME -p'$MYSQL_PASSWORD' -h $MYSQL_HOSTNAME"
@@ -61,33 +57,34 @@ Slave_ERROR=$(extract_value $SLAVE_STATUS Last_Error)
 Seconds_Behind_Master=$(extract_value $SLAVE_STATUS Seconds_Behind_Master)
 
 ERROR_COUNT=0
+ERRORS=""
 if [[ "$Master_Binlog" != "$Master_Log_File" ]]
 then
-    ERRORS[$ERROR_COUNT]="master binlog ($Master_Binlog) and Master_Log_File ($Master_Log_File) differ"
+    ERRORS="master binlog ($Master_Binlog) and Master_Log_File ($Master_Log_File) differ|$ERRORS"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
 if [[ $Seconds_Behind_Master -gt 1000 ]]
 then
-    ERRORS[$ERROR_COUNT]="The slave is lagging behind of master by $Seconds_Behind_Master seconds"
+    ERRORS="The slave is lagging behind of master by $Seconds_Behind_Master seconds|$ERRORS"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
 if [[ "$Slave_IO_Running" == "No" ]]
 then
-    ERRORS[$ERROR_COUNT]="Replication is stopped"
+    ERRORS="Replication is stopped|$ERRORS"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
 if [[ "$Slave_SQL_Running" == "No" ]]
 then
-    ERRORS[$ERROR_COUNT]="Replication (SQL) is stopped"
+    ERRORS="Replication (SQL) is stopped|$ERRORS"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
+JSON_ERRORS=$(echo $ERRRORS | jq -R 'split("|")')
 if [[ $ERROR_COUNT -gt 0 ]]
 then
-    JSON_ERRORS=$(json_array $ERRORS)
     STATUS="{\"success\": false, \"position_lag\": \"$Seconds_Behind_Master\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
 else
     STATUS="{\"success\": true, \"position_lag\": \"$Seconds_Behind_Master\", \"error_count\": 0}"
