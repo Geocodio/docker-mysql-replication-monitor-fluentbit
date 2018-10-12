@@ -59,7 +59,7 @@ then
 fi
 
 Master_Binlog=$(extract_value $SLAVE_STATUS Master_Log_File )
-Master_Position=$(extract_value $SLAVE_STATUS Read_Master_Log_Pos )
+Master_Position=$(extract_value $SLAVE_STATUS Exec_Master_Log_Pos )
 Master_Host=$(extract_value $SLAVE_STATUS Master_Host)
 Master_Port=$(extract_value $SLAVE_STATUS Master_Port)
 Master_Log_File=$(extract_value $SLAVE_STATUS Master_Log_File)
