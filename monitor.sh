@@ -97,10 +97,7 @@ fi
 
 if [[ $ERROR_COUNT -gt 0 ]]
 then
-  if [[ check_alert_lock == 0 ]]
-  then
     STATUS="{\"success\": false, , \"lag_seconds\": \"$POS_DIFFERENCE\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
-  fi
 else
     STATUS="{\"success\": true, \"lag_seconds\": \"$POS_DIFFERENCE\", \"error_count\": 0}"
 fi
