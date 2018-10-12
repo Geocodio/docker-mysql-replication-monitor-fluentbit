@@ -75,7 +75,7 @@ then
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-POS_DIFFERENCE=$(echo ${Master_Position}-${Read_Master_Log_Pos}|bc)
+POS_DIFFERENCE=$(echo ${Read_Master_Log_Pos}-${Master_Position}|bc)
 
 if [[ $POS_DIFFERENCE -gt 1000 ]]
 then
@@ -97,9 +97,9 @@ fi
 
 if [[ $ERROR_COUNT -gt 0 ]]
 then
-    STATUS="{\"success\": false, , \"lag_seconds\": \"$POS_DIFFERENCE\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
+    STATUS="{\"success\": false, , \"position_lag\": \"$POS_DIFFERENCE\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
 else
-    STATUS="{\"success\": true, \"lag_seconds\": \"$POS_DIFFERENCE\", \"error_count\": 0}"
+    STATUS="{\"success\": true, \"position_lag\": \"$POS_DIFFERENCE\", \"error_count\": 0}"
 fi
 
 send_status $STATUS
