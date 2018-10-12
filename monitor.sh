@@ -31,14 +31,7 @@ function extract_value {
 }
 
 function json_array() {
-  echo -n '['
-  while [ $# -gt 0 ]; do
-    x=${1//\\/\\\\}
-    echo -n \"${x//\"/\\\"}\"
-    [ $# -gt 1 ] && echo -n ', '
-    shift
-  done
-  echo ']'
+  printf '%s\n' "${X[@]}" | jq -R . | jq -s .
 }
 
 SLAVE_STATUS=/tmp/sstatus
@@ -59,27 +52,24 @@ then
 fi
 
 Master_Binlog=$(extract_value $SLAVE_STATUS Master_Log_File )
-Master_Position=$(extract_value $SLAVE_STATUS Exec_Master_Log_Pos )
 Master_Host=$(extract_value $SLAVE_STATUS Master_Host)
 Master_Port=$(extract_value $SLAVE_STATUS Master_Port)
 Master_Log_File=$(extract_value $SLAVE_STATUS Master_Log_File)
-Read_Master_Log_Pos=$(extract_value $SLAVE_STATUS Read_Master_Log_Pos)
 Slave_IO_Running=$(extract_value $SLAVE_STATUS Slave_IO_Running)
 Slave_SQL_Running=$(extract_value $SLAVE_STATUS Slave_SQL_Running)
 Slave_ERROR=$(extract_value $SLAVE_STATUS Last_Error)
+Seconds_Behind_Master=$(extract_value $SLAVE_STATUS Seconds_Behind_Master)
 
 ERROR_COUNT=0
 if [[ "$Master_Binlog" != "$Master_Log_File" ]]
 then
-    ERRORS[$ERROR_COUNT]="master binlog ($Master_Binlog) and Master_Log_File         ($Master_Log_File) differ"
+    ERRORS[$ERROR_COUNT]="master binlog ($Master_Binlog) and Master_Log_File ($Master_Log_File) differ"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-POS_DIFFERENCE=$(echo ${Master_Position}-${Read_Master_Log_Pos}|bc)
-
-if [[ $POS_DIFFERENCE -gt 1000 ]]
+if [[ $Seconds_Behind_Master -gt 1000 ]]
 then
-    ERRORS[$ERROR_COUNT]="The slave is lagging behind of $POS_DIFFERENCE"
+    ERRORS[$ERROR_COUNT]="The slave is lagging behind of master by $Seconds_Behind_Master seconds"
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
@@ -98,9 +88,9 @@ fi
 if [[ $ERROR_COUNT -gt 0 ]]
 then
     JSON_ERRORS=$(json_array $ERRORS)
-    STATUS="{\"success\": false, \"position_lag\": \"$POS_DIFFERENCE\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
+    STATUS="{\"success\": false, \"position_lag\": \"$Seconds_Behind_Master\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
 else
-    STATUS="{\"success\": true, \"position_lag\": \"$POS_DIFFERENCE\", \"error_count\": 0}"
+    STATUS="{\"success\": true, \"position_lag\": \"$Seconds_Behind_Master\", \"error_count\": 0}"
 fi
 
 send_status $STATUS
