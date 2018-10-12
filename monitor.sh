@@ -75,7 +75,7 @@ then
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-POS_DIFFERENCE=$(echo ${Read_Master_Log_Pos}-${Master_Position}|bc)
+POS_DIFFERENCE=$(echo ${Master_Position}-${Read_Master_Log_Pos}|bc)
 
 if [[ $POS_DIFFERENCE -gt 1000 ]]
 then
