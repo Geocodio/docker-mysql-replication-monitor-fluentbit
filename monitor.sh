@@ -82,7 +82,7 @@ then
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
-JSON_ERRORS=$(echo $ERRRORS | jq -R 'split("|")')
+JSON_ERRORS=$(echo $ERRORS | jq -R 'split("|")')
 if [[ $ERROR_COUNT -gt 0 ]]
 then
     STATUS="{\"success\": false, \"position_lag\": \"$Seconds_Behind_Master\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
