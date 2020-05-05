@@ -85,9 +85,9 @@ fi
 JSON_ERRORS=$(echo $ERRORS | jq -R 'split("|")')
 if [[ $ERROR_COUNT -gt 0 ]]
 then
-    STATUS="{\"success\": false, \"position_lag\": \"$Seconds_Behind_Master\", \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
+    STATUS="{\"success\": false, \"position_lag\": $Seconds_Behind_Master, \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
 else
-    STATUS="{\"success\": true, \"position_lag\": \"$Seconds_Behind_Master\", \"error_count\": 0}"
+    STATUS="{\"success\": true, \"position_lag\": $Seconds_Behind_Master, \"error_count\": 0}"
 fi
 
 send_status $STATUS
