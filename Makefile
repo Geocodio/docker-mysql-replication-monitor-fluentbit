@@ -12,4 +12,4 @@ deploy:
 	docker push $(org)/$(name)
 
 run:
-	docker run --rm --name=$(name) --env-file=.env $(tag)
+	docker run -it --rm --name=$(name) --env-file=.env $(org)/$(name)

@@ -1,10 +1,9 @@
-FROM nickbreen/cron:v1.0.0
+FROM alpine:3.11
 
 MAINTAINER Mathias Hansen <mathias@geocod.io>
 
-RUN apt-get -qqy update && \
-  DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-client wget && \
-  apt-get -qqy clean
+RUN apk add --no-cache mysql-client wget bash && \
+    rm -f /var/cache/apk/*
 
 # Download newest version of jq
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /usr/bin/jq && \
@@ -12,6 +11,9 @@ RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /
 
 ENV MYSQL_HOSTNAME="" MYSQL_USERNAME="" MYSQL_PASSWORD="" FLUENTBIT_HOSTNAME="" FLUENTBIT_PORT="5170"
 
-ENV CRON_D_MONITOR="*/5 * * * * root /monitor.sh | logger\n"
+ENV TIME_BETWEEN_CHECKS=60
 
-COPY monitor.sh /
+COPY monitor.sh /monitor.sh
+COPY entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["sh", "entrypoint.sh"]

@@ -4,8 +4,6 @@ This will monitor a MySQL slave server for errors and replication lag and send t
 
 ## Configuration
 
-Per default, a cronjob will run every 5 minutes, but any of the settings can be overwritten with the following environment variables:
-
 ```
 MYSQL_HOSTNAME
 MYSQL_USERNAME
@@ -15,10 +13,9 @@ FLUENTBIT_PORT="5170"
 ```
 
 ```
-CRON_D_MONITOR="*/5 * * * * root /monitor.sh | logger\n"
+# Time is defined in seconds
+TIME_BETWEEN_CHECKS=60
 ```
-
-**Note**: The "\n" at the end of the line is required by `cron` to be able to recognize the job
 
 > See also `.env.example`
 
