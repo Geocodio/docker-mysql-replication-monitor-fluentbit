@@ -27,7 +27,7 @@ function safe_command {
 function extract_value {
     FILENAME=$1
     VAR=$2
-    grep -w $VAR $FILENAME | awk '{print $2}'
+    grep -w $VAR $FILENAME | cut -d ':' -f '2-'| awk '{$1=$1};1'
 }
 
 SLAVE_STATUS=/tmp/sstatus
@@ -55,6 +55,7 @@ Slave_IO_Running=$(extract_value $SLAVE_STATUS Slave_IO_Running)
 Slave_SQL_Running=$(extract_value $SLAVE_STATUS Slave_SQL_Running)
 Slave_ERROR=$(extract_value $SLAVE_STATUS Last_Error)
 Seconds_Behind_Master=$(extract_value $SLAVE_STATUS Seconds_Behind_Master)
+Last_IO_Error=$(extract_value $SLAVE_STATUS Last_IO_Error)
 
 ERROR_COUNT=0
 ERRORS=""
@@ -70,6 +71,13 @@ then
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
+if [[ $Seconds_Behind_Master == "NULL" ]]
+then
+    Seconds_Behind_Master=9999999
+    ERRORS="The slave lag is NULL, indicating an error|$ERRORS"
+    ERROR_COUNT=$(($ERROR_COUNT+1))
+fi
+
 if [[ "$Slave_IO_Running" == "No" ]]
 then
     ERRORS="Replication is stopped|$ERRORS"
@@ -82,10 +90,12 @@ then
     ERROR_COUNT=$(($ERROR_COUNT+1))
 fi
 
+# Right trim the | character
+ERRORS="${ERRORS%%|}"
 JSON_ERRORS=$(echo $ERRORS | jq -R 'split("|")')
 if [[ $ERROR_COUNT -gt 0 ]]
 then
-    STATUS="{\"success\": false, \"position_lag\": $Seconds_Behind_Master, \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR\"}"
+    STATUS="{\"success\": false, \"position_lag\": $Seconds_Behind_Master, \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR$Last_IO_Error\"}"
 else
     STATUS="{\"success\": true, \"position_lag\": $Seconds_Behind_Master, \"error_count\": 0}"
 fi
