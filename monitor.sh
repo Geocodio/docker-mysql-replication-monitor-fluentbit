@@ -95,7 +95,9 @@ ERRORS="${ERRORS%%|}"
 JSON_ERRORS=$(echo $ERRORS | jq -R 'split("|")')
 if [[ $ERROR_COUNT -gt 0 ]]
 then
-    STATUS="{\"success\": false, \"position_lag\": $Seconds_Behind_Master, \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": \"$Slave_ERROR$Last_IO_Error\"}"
+    MESSAGE="$Slave_ERROR$Last_IO_Error"
+    MESSAGE=$(echo $MESSAGE | jq -R .)
+    STATUS="{\"success\": false, \"position_lag\": $Seconds_Behind_Master, \"error_count\": $ERROR_COUNT, \"errors\": $JSON_ERRORS, \"message\": $MESSAGE}"
 else
     STATUS="{\"success\": true, \"position_lag\": $Seconds_Behind_Master, \"error_count\": 0}"
 fi
